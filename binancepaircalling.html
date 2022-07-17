@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Binance coins with only BTC Trading Pair</title>
+</head>
+<body>
+	<h1 align="center">Binance listed coins (only BTC trading pairs)</h1>
+	<p align="center">Displaying all listed coins having only one and with BTC coin trading pair.</p>
+	<div>
+		<h3>Coins</h3>
+		<h4 id="totalCoins"></h4>
+		<h4>Coins: </h4>
+		<h5 id="displayCoins"></h5>
+	</div>
+</body>
+<script>
+	var burl = "https://api.binance.com";
+	var query = '/api/v1/exchangeInfo';
+	    
+	/*query += '?symbol=BTCUSDT';*/
+
+	var url = burl + query;
+	quote = "BTC";
+	    
+	var ourRequest = new XMLHttpRequest();
+
+	ourRequest.open('GET',url,true);
+	ourRequest.onload = function(){
+	    var response = ourRequest.responseText;
+	    //console.log(JSON.parse(response));
+	    var symbols = JSON.parse(response).symbols;
+	    //console.log(symbols);
+
+	    const propComparator = (propName) =>
+		  (a, b) => a[propName] == b[propName] ? 0 : a[propName] < b[propName] ? -1 : 1
+
+	    //console.log(symbols.sort(propComparator('baseAsset'))); // all binance pairs in sorted manner
+	    //console.log(symbols.length);
+	    var bAsset = [];
+	    var bAssetAlt = [];
+	    var altOnlyBtcPair = [];
+
+	    for (var i = 0; i <= symbols.length - 1; i++) 
+	    {
+	    	//console.log(symbols[i]);
+	    	if (symbols[i].status == 'TRADING')
+	    	{
+	    		bAsset.push(symbols[i].baseAsset);
+	    	}
+	    }
+		//console.log(bAsset); // all coins with trading status in sorted manner
+		//console.log(bAsset.length);
+	    //console.log(bAsset.sort());// all coins with trading status in sorted manner
+	    var sortedBasset = bAsset.sort();
+
+	    function count(sortedBasset) 
+	    {
+		    array_elements = sortedBasset;
+		    var current = null;
+		    var cnt = 0;
+		    for (var i = 0; i < array_elements.length; i++) 
+		    {
+		        if (array_elements[i] != current) 
+		        {
+		            if (cnt > 0) 
+		            {
+		                //console.log(current + ' comes --> ' + cnt + ' times</n>');
+		                if (cnt == 1)
+		                {
+		                	altCount = current;
+		                	//console.log(altCount); // coin having only one trading pair
+		                	bAssetAlt.push(altCount);
+		                }
+		            }
+		            current = array_elements[i];
+		            cnt = 1;
+		        } 
+		        else 
+		        {
+		            cnt++;
+		        }
+		    }
+		    if (cnt > 0) 
+		    {
+		        //console.log(current + ' comes --> ' + cnt + ' times');
+		        if (cnt == 1)
+                {
+                	altCount = current;
+                	//console.log(altCount); // coin having only one trading pair
+		            bAssetAlt.push(altCount);
+                }
+		    }
+			return bAssetAlt;
+		}
+		
+		var altsPairs = count(sortedBasset);
+		//console.log(altsPairs.length);
+
+		for (var s = 0; s < altsPairs.length; s++)
+		{
+			for (var j = 0; j < symbols.length; j++)
+			{
+				if ( altsPairs[s] == symbols[j].baseAsset && symbols[j].quoteAsset == 'BTC' )
+				{
+					altOnlyBtcPair.push(altsPairs[s]);
+				}
+			}
+		}
+		document.getElementById('displayCoins').innerHTML = altOnlyBtcPair;
+		console.log(altOnlyBtcPair); // all coins having only one and that is BTC trading pair
+		document.getElementById('totalCoins').innerHTML = "Total no. of coins: " + altOnlyBtcPair.length;
+	}
+
+	ourRequest.send();
+</script>
+</html>
